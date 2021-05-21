@@ -3,6 +3,11 @@ import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
 
+interface LoginInterface {
+  id: string;
+  password: string;
+}
+
 export const loginScheme = yup.object({
   id: yup.string().required(),
   password: yup.string().required(),
@@ -10,12 +15,14 @@ export const loginScheme = yup.object({
 
 async function login(req: Request, res: Response) {
   try {
-    const { id, password } = loginScheme.validateSync(req.body);
-    const rows = await db("SELECT * FROM user WHERE id=?", [id]);
+    const user: LoginInterface = loginScheme.validateSync(req.body);
+
+    const rows = await db("SELECT * FROM user WHERE id=?", [user.id]);
     if (!rows[0]) res.status(400).send({ success: false });
-    else if (await argon2.verify(rows[0].password, password)) {
-      req.session.userId = id;
-      req.session.password = password;
+    else if (await argon2.verify(rows[0].password, user.password)) {
+      req.session.userId = user.id;
+      req.session.password = user.password;
+      req.session.isHost = rows[0].isHost
       req.session.isLogedIn = true;
       res.send({
         success: true,
@@ -34,14 +41,6 @@ async function logout(req: Request, res: Response) {
   });
   res.send({ success: true });
 }
-
-//테스트 코드
-// async function test(req: Request, res: Response) {
-//   const rows = await db("SELECT * FROM user", []);
-//   const user1 = rows[0].id;
-//   console.log(user1);
-//   res.send(rows);
-// }
 
 const router = Router();
 

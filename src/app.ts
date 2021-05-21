@@ -1,8 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { db } from "./db/db";
-import user from "./api/user";
-import test from "./api/User/login";
+import register from "./api/User/register";
 
 const app = express();
 
@@ -12,8 +11,9 @@ app.use(express.urlencoded({ extended: true }));
 
 declare module "express-session" {
   interface SessionData {
-    userId: String;
-    password: String;
+    userId: string;
+    password: string;
+    isHost: boolean;
     isLogedIn: boolean;
   }
 }
@@ -33,8 +33,8 @@ app.get("/", async (req, res) => {
   res.send(rows);
 });
 
-app.use("/api/user", user);
-app.use("/api/test", test);
+// app.use("/api/user", user);
+app.use("/api/test", register);
 
 app.listen(app.get("port"), () => {
   console.log("start");
