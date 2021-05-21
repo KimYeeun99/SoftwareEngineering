@@ -1,7 +1,7 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import session from "express-session";
 import { db } from "./db/db";
-import register from "./api/User/register";
+import user from "./api/User/route";
 
 const app = express();
 
@@ -33,8 +33,7 @@ app.get("/", async (req, res) => {
   res.send(rows);
 });
 
-// app.use("/api/user", user);
-app.use("/api/test", register);
+app.use("/api/user", user);
 
 app.listen(app.get("port"), () => {
   console.log("start");

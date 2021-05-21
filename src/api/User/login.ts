@@ -1,4 +1,4 @@
-import { Router, Response, Request } from "express";
+import { Response, Request } from "express";
 import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
@@ -19,6 +19,7 @@ async function login(req: Request, res: Response) {
       req.session.password = password;
       req.session.isHost = rows[0].isHost;
       req.session.isLogedIn = true;
+
       res.send({
         success: true,
       });
@@ -37,9 +38,4 @@ async function logout(req: Request, res: Response) {
   res.send({ success: true });
 }
 
-const router = Router();
-
-router.post("/login", login);
-router.post("/logout", logout);
-
-export default router;
+export { login, logout };

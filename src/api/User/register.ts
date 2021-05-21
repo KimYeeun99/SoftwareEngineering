@@ -1,4 +1,4 @@
-import { Router, Response, Request } from "express";
+import { Response, Request } from "express";
 import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
@@ -41,9 +41,4 @@ async function delUser(req: Request, res: Response) {
   }
 }
 
-const router = Router();
-
-router.post("/register", register);
-router.delete("/delUser", delUser);
-
-export default router;
+export { register, delUser };
