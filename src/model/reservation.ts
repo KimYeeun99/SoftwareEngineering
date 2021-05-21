@@ -4,7 +4,8 @@ import { Room } from "./roomType";
 interface Reservation {
   user: User;
   room: Room;
-  date: string;
+  startDate: string;
+  endDate: string;
 }
 
 interface ReservationInfo {
