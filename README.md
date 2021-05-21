@@ -1,3 +1,1 @@
-# SocialProject
-# SoftwareEngineering
 # SoftwareEngineering
