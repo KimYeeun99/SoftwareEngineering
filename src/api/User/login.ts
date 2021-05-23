@@ -2,26 +2,33 @@ import { Response, Request } from "express";
 import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
+import { LoginClass } from "../../model/user";
 
-export const loginScheme = yup.object({
+const loginScheme = yup.object({
   id: yup.string().required(),
   password: yup.string().required(),
+  isHost: yup.boolean().required(),
 });
 
 async function login(req: Request, res: Response) {
   try {
-    const { id, password } = loginScheme.validateSync(req.body);
+    const { id, password, isHost } = loginScheme.validateSync(req.body);
+    const user = new LoginClass(id, password, isHost);
+    var sql: string;
+    if (user.getIsHost() == true) {
+      sql = "SELECT * FROM host WHERE id=?";
+    } else {
+      sql = "SELECT * FROM user WHERE id=?";
+    }
 
-    const rows = await db("SELECT * FROM user WHERE id=?", [id]);
+    const rows = await db(sql, [user.getId()]);
     if (!rows[0]) res.status(400).send({ success: false });
-    else if (await argon2.verify(rows[0].password, password)) {
-      req.session.userId = id;
-      req.session.password = password;
+    else if (await argon2.verify(rows[0].password, user.getPassword())) {
+      req.session.userId = user.getId();
       req.session.isHost = rows[0].isHost;
       req.session.isLogedIn = true;
-
       res.send({
-        success: true,
+        success: true, //return boolean
       });
     } else {
       res.status(400).send({ success: false });

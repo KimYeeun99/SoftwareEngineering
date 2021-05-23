@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { login, logout } from "./login";
-import { register, delUser } from "./register";
+// import { register, delUser } from "./register";
+import { register, delUser } from "./hostRegister";
 
 const router = Router();
 
