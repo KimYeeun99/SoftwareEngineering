@@ -1,22 +1,48 @@
 import { iUser } from "./register";
 import { Room } from "./roomType";
+interface ReserveInterface {
+  reserve_id: number; //pk값
+  room_id: number;
+  user_id: string;
+  people: number; //이용자 수
+  name: string; //예약자 이름
+  phone: string; //예약자 핸드폰
+  price: number; //가격
+  startDate: string; //시작날짜
+  endDate: string; //끝나는날짜
+
+  room: Room; //선택한 방
+  customer: iUser; //예약자
+}
 
 class Reservation {
-  private id: number; //pk값
+  private reserve_id: number; //pk값
   private room: Room; //선택한 방
-  private userNum: number; //이용자 수
+  private people: number; //이용자 수
   private customer: iUser; //예약자
   private name: string; //예약자 이름
   private phone: string; //예약자 핸드폰
   private price: number; //가격
-  private startDate: Date; //시작날짜
-  private endDate: Date; //끝나는날짜
+  private startDate: string; //시작날짜
+  private endDate: string; //끝나는날짜
 
-  public getId() {
-    return this.id;
+  constructor(reservation: ReserveInterface) {
+    this.reserve_id = reservation.reserve_id;
+    this.room = reservation.room;
+    this.people = reservation.people;
+    this.customer = reservation.customer;
+    this.name = reservation.name;
+    this.phone = reservation.phone;
+    this.price = reservation.price;
+    this.startDate = reservation.startDate;
+    this.endDate = reservation.endDate;
   }
-  public setId(id: number) {
-    this.id = id;
+
+  public getReserve_id() {
+    return this.reserve_id;
+  }
+  public setReserve_id(reserve_id: number) {
+    this.reserve_id = reserve_id;
   }
   public getRoom() {
     return this.room;
@@ -24,11 +50,11 @@ class Reservation {
   public setRoom(room: Room) {
     this.room = room;
   }
-  public getUserNum() {
-    return this.userNum;
+  public getPeople() {
+    return this.people;
   }
-  public setUserNum(userNum: number) {
-    this.userNum = userNum;
+  public setPeople(people: number) {
+    this.people = people;
   }
   public getCustomer() {
     return this.customer;
@@ -57,15 +83,15 @@ class Reservation {
   public getStartDate() {
     return this.startDate;
   }
-  public setStartDate(startDate: Date) {
+  public setStartDate(startDate: string) {
     this.startDate = startDate;
   }
   public getEndDate() {
     return this.endDate;
   }
-  public setEndDate(endDate: Date) {
+  public setEndDate(endDate: string) {
     this.endDate = endDate;
   }
 }
 
-export { Reservation };
+export { ReserveInterface, Reservation };

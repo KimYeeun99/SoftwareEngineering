@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
-import { LoginClass } from "../../model/user";
+import { LoginClass } from "../../model/login";
 
 const loginScheme = yup.object({
   id: yup.string().required(),

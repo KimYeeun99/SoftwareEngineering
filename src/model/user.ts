@@ -1,47 +1,16 @@
-class LoginClass {
+class User {
   private id: string;
   private password: string;
   private isHost: boolean;
-
-  constructor(id: string, password: string, isHost: boolean) {
-    this.id = id;
-    this.password = password;
-    this.isHost = isHost;
-  }
-
-  public getId() {
-    return this.id;
-  }
-  public setId(id: string) {
-    this.id = id;
-  }
-  public getPassword() {
-    return this.password;
-  }
-  public setPassword(password: string) {
-    this.password = password;
-  }
-  public getIsHost() {
-    return this.isHost;
-  }
-  public setIsHost(isHost: boolean) {
-    this.isHost = isHost;
-  }
 }
 
-// class Customer implements User {
-//   id: string;
-//   password: string;
-//   nickname: string;
-//   isHost: boolean;
-// }
+class Customer extends User {
+  private nickname: string;
+}
 
-// class Host implements User {
-//   id: string;
-//   password: string;
-//   isHost: boolean;
-//   name: string;
-//   num: string;
-// }
+class Host extends User {
+  private name: string;
+  private businesNum: string;
+}
 
-export { LoginClass };
+export { Customer, Host };

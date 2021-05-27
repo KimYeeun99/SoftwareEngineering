@@ -1,12 +1,13 @@
-// import { Response, Request } from "express";
-// import * as yup from "yup";
-// import { db } from "../../db/db";
-// import { CampInfo } from "../../model/camp";
-// import moment from "moment";
+import { Response, Request } from "express";
+import * as yup from "yup";
+import { db } from "../../db/db";
+import { Camp, CampInfo } from "../../model/camp";
+import moment from "moment";
+import { Room, RoomInfo } from "../../model/roomType";
 
-// function formatDate(date) {
-//   return moment(date).format("YYYY-MM-DD HH:mm:ss");
-// }
+function formatDate(date) {
+  return moment(date).format("YYYY-MM-DD HH:mm:ss");
+}
 
 // const campInfoSchema = yup.object({
 //   name: yup.string().required(),
@@ -32,51 +33,85 @@
 // //   }
 // // }
 
-// async function getAllCampInfo(req: Request, res: Response) {
-//   try {
-//     const rows = await db("select * from campInfo order by regdate desc", []);
-//     const data: Array<CampInfo> = JSON.parse(JSON.stringify(rows));
-//     const list: Array<CampInfo> = [];
+async function getAllCampInfo(req: Request, res: Response) {
+  try {
+    const rows = await db("select * from campInfo order by regdate desc", []);
+    const data: Array<CampInfo> = JSON.parse(JSON.stringify(rows));
+    const list: Array<Camp> = [];
 
-//     data.forEach((value) => {
-//       value.regDate = formatDate(value.regDate);
-//       list.push(value);
-//     });
+    data.forEach((value) => {
+      const camp = new Camp(value);
+      camp.setRegDate(formatDate(value.regDate));
+      list.push(camp);
+    });
 
-//     res.json({
-//       success: true,
-//       data: list,
-//     });
-//   } catch (error) {
-//     res.status(500).send({
-//       success: false,
-//     });
-//   }
-// }
+    res.json({
+      success: true,
+      data: list,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
 
-// async function getOneCampInfo(req: Request, res: Response) {
-//   try {
-//     const camp_id = req.params.id;
-//     const rows = await db("select * from camp where id = ?", [camp_id]);
+async function getOneCampInfo(req: Request, res: Response) {
+  try {
+    const camp_id = req.params.id;
+    const rows1 = await db("select * from campInfo where id = ?", [camp_id]);
+    const rows2 = await db("select * from room where camp_id = ?", [camp_id]);
 
-//     if (!rows[0]) {
-//       res.status(400).send({ success: false });
-//     } else {
-//       const read: CampInfo = rows[0];
-//       read.regDate = formatDate(read.regDate);
+    if (!rows1[0]) {
+      res.status(400).send({ success: false });
+    } else {
+      const read: CampInfo = rows1[0];
+      const room: Array<Room> = JSON.parse(JSON.stringify(rows2));
 
-//       res.json({
-//         success: true,
-//         data: read,
-//       });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       success: false,
-//     });
-//   }
-// }
+      const detailCamp = new Camp(read);
+      detailCamp.setRooms(room);
+      detailCamp.setRegDate(formatDate(read.regDate));
+
+      res.json({
+        success: true,
+        data: detailCamp,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
+
+async function getRoomInfo(req: Request, res: Response) {
+  try {
+    const camp_id = req.params.camp_id;
+    const room_id = req.params.room_id;
+    const rows = await db(
+      "select * from room where camp_id=? and room_id = ?",
+      [camp_id, room_id]
+    );
+
+    if (!rows[0]) {
+      res.status(400).send({ success: false });
+    } else {
+      const read: Room = rows[0];
+      const room = new RoomInfo(read);
+
+      res.json({
+        success: true,
+        data: room,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
 
 // // async function updateCampInfo(req: Request, res: Response) {
 // //   try {
@@ -104,4 +139,4 @@
 // //   }
 // // }
 
-// export { getAllCampInfo };
+export { getAllCampInfo, getOneCampInfo, getRoomInfo };
