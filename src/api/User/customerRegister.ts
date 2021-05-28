@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import * as yup from "yup";
 import { db } from "../../db/db";
 import argon2 from "argon2";
-import { RegisterHostClass, iUser } from "../../model/register";
+import { RegisterCustomerClass, iUser } from "../../model/register";
 
 const registerScheme = yup.object({
   user: yup.object().shape({
@@ -10,38 +10,30 @@ const registerScheme = yup.object({
     password: yup.string().required(),
     isHost: yup.boolean().required(),
   }),
-  name: yup.string().required(),
-  businessNum: yup.string().required(),
+  nickname: yup.string().required(),
 });
 
-async function register(req: Request, res: Response) {
+async function cusRegister(req: Request, res: Response) {
   try {
-    const { user, name, businessNum } = registerScheme.validateSync(req.body);
+    const { user, nickname } = registerScheme.validateSync(req.body);
 
-    const host: RegisterHostClass = new RegisterHostClass(
+    const customer: RegisterCustomerClass = new RegisterCustomerClass(
       user as iUser,
-      name,
-      businessNum
+      nickname
     );
 
     const search1 = await db("SELECT id FROM host WHERE id=?", [
-      host.getUserInfo().id,
+      customer.getUserInfo().id,
     ]);
     const search2 = await db("SELECT id FROM user WHERE id=?", [
-      host.getUserInfo().id,
+      customer.getUserInfo().id,
     ]);
 
     const hashPassword = await argon2.hash(user.password);
     if (!(search1[0] || search2[0])) {
       const rows = await db(
-        "INSERT INTO host(id, password, isHost, name, businessNum) VALUES(?,?,?,?,?)",
-        [
-          host.getUserInfo().id,
-          hashPassword,
-          true,
-          host.getName(),
-          host.getBusinessNum(),
-        ]
+        "INSERT INTO user(id, password, isHost, nickname) VALUES(?,?,?,?)",
+        [customer.getUserInfo().id, hashPassword, true, customer.getNickname()]
       );
       res.send({ success: true });
     } else {
@@ -52,7 +44,7 @@ async function register(req: Request, res: Response) {
   }
 }
 
-async function delUser(req: Request, res: Response) {
+async function cusDelUser(req: Request, res: Response) {
   try {
     const rows = await db("DELETE FROM user WHERE id=?", [req.session.id]);
     res.send({ success: true });
@@ -61,4 +53,4 @@ async function delUser(req: Request, res: Response) {
   }
 }
 
-export { register, delUser };
+export { cusRegister, cusDelUser };

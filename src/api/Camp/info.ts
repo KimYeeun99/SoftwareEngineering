@@ -9,29 +9,35 @@ function formatDate(date) {
   return moment(date).format("YYYY-MM-DD HH:mm:ss");
 }
 
-// const campInfoSchema = yup.object({
-//   name: yup.string().required(),
-// });
+const campInfoSchema = yup.object({
+  name: yup.string().required(),
+  contents: yup.string().required(),
+});
 
-// // async function insertCampInfo(req: Request, res: Response) {
-// //   try {
-// //     const { id, body } = campInfoSchema.validateSync(req.body);
+async function insertCampInfo(req: Request, res: Response) {
+  try {
+    const { name, contents } = campInfoSchema.validateSync(req.body);
 
-// //     const user_id = req.body.data.id;
-
-// //     const rows = await db(
-// //       "INSERT INTO board (title, body, user_id) values (?, ?, ?)",
-// //       [title, body, user_id]
-// //     );
-// //     res.send({
-// //       success: true,
-// //     });
-// //   } catch (error) {
-// //     res.status(500).send({
-// //       success: false,
-// //     });
-// //   }
-// // }
+    if (!req.session.isLogedIn) {
+      res.status(400).send({
+        success: false,
+      });
+    }
+    const writer = req.session.userId;
+    console.log(name, writer, contents);
+    const rows = await db(
+      "insert into campInfo(name, writer, contents) values(?,?,?)",
+      [name, writer, contents]
+    );
+    res.send({
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
 
 async function getAllCampInfo(req: Request, res: Response) {
   try {
@@ -79,6 +85,45 @@ async function getOneCampInfo(req: Request, res: Response) {
     }
   } catch (error) {
     console.log(error);
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
+
+const roomInfoSchema = yup.object({
+  camp_id: yup.number().required(),
+  name: yup.string().required(),
+  price: yup.number().required(),
+  info: yup.string().required(),
+});
+
+/*
+CREATE TABLE `Room` (
+	`room_id`	INTEGER AUTO_INCREMENT 	NOT NULL,
+    `camp_id` INTEGER,
+	`name`	VARCHAR(20) 	NOT NULL,
+    `price` INTEGER NOT NULL,
+    `info`	Text 	NOT NULL,
+	PRIMARY KEY(`room_id`),
+    FOREIGN KEY(`camp_id`) REFERENCES CampInfo(`id`) ON DELETE CASCADE
+);
+*/
+
+async function insertRoomInfo(req: Request, res: Response) {
+  try {
+    const { camp_id, name, price, info } = roomInfoSchema.validateSync(
+      req.body
+    );
+
+    const rows = await db(
+      "INSERT INTO room (camp_id, name, price, info) values (?, ?, ?, ?)",
+      [camp_id, name, price, info]
+    );
+    res.send({
+      success: true,
+    });
+  } catch (error) {
     res.status(500).send({
       success: false,
     });
@@ -139,4 +184,10 @@ async function getRoomInfo(req: Request, res: Response) {
 // //   }
 // // }
 
-export { getAllCampInfo, getOneCampInfo, getRoomInfo };
+export {
+  getAllCampInfo,
+  getOneCampInfo,
+  getRoomInfo,
+  insertCampInfo,
+  insertRoomInfo,
+};

@@ -25,7 +25,7 @@ async function login(req: Request, res: Response) {
     if (!rows[0]) res.status(400).send({ success: false });
     else if (await argon2.verify(rows[0].password, user.getPassword())) {
       req.session.userId = user.getId();
-      req.session.isHost = rows[0].isHost;
+      req.session.isHost = isHost;
       req.session.isLogedIn = true;
       res.send({
         success: true, //return boolean
