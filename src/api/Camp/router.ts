@@ -14,7 +14,7 @@ router.get("/allCamp", getAllCampInfo);
 router.get("/detailCamp/:id", getOneCampInfo);
 router.get("/detailCamp/:camp_id/:room_id", getRoomInfo);
 
-router.post("/insertCamp/", insertCampInfo);
+router.post("/insertCamp", insertCampInfo);
 router.post("/insertRoom/:camp_id", insertRoomInfo);
 
 router.put("/updateCamp/:camp_id", updateCampInfo);

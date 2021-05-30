@@ -31,7 +31,8 @@ async function register(req: Request, res: Response) {
       host.getUserInfo().id,
     ]);
 
-    const hashPassword = await argon2.hash(user.password);
+    //const hashPassword = await argon2.hash(user.password); //비번 암호화
+    const hashPassword = user.password;
     if (!(search1[0] || search2[0])) {
       const rows = await db(
         "INSERT INTO host(id, password, isHost, name, businessNum) VALUES(?,?,?,?,?)",

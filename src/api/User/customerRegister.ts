@@ -29,7 +29,8 @@ async function cusRegister(req: Request, res: Response) {
       customer.getUserInfo().id,
     ]);
 
-    const hashPassword = await argon2.hash(user.password);
+    //const hashPassword = await argon2.hash(user.password); //비번 암호화
+    const hashPassword = user.password;
     if (!(search1[0] || search2[0])) {
       const rows = await db(
         "INSERT INTO user(id, password, isHost, nickname) VALUES(?,?,?,?)",
