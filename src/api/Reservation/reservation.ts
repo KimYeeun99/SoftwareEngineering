@@ -14,21 +14,11 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const registerScheme = yup.object({
-  user: yup.object().shape({
-    id: yup.string().required(),
-    password: yup.string().required(),
-    isHost: yup.boolean().required(),
-  }),
-  name: yup.string().required(),
-  businessNum: yup.string().required(),
-});
-
 async function getReservation(req: Request, res: Response) {
   try {
     const rows = await db(
       "select * from reservation where user_id =? order by startDate desc",
-      [req.body.id]
+      [req.session.userId]
     );
 
     const data: Array<ReserveInterface> = JSON.parse(JSON.stringify(rows));
@@ -39,7 +29,7 @@ async function getReservation(req: Request, res: Response) {
         value.room_id,
       ]);
       const detailUser = await db("select * from user where id=?", [
-        req.body.id,
+        req.session.userId,
       ]);
 
       const room: Room = detailRoom[0];
@@ -69,4 +59,114 @@ async function getReservation(req: Request, res: Response) {
   }
 }
 
-export { getReservation };
+const reservationSchema = yup.object({
+  room_id: yup.number().required(),
+  //user_id: yup.string().required(),
+  people: yup.number().required(),
+  name: yup.string().required(),
+  phone: yup.string().required(),
+  price: yup.number().required(),
+  startDate: yup.date().required(),
+  endDate: yup.date().required(),
+});
+
+async function postReservation(req: Request, res: Response) {
+  try {
+    const { room_id, people, name, phone, price, startDate, endDate } =
+      reservationSchema.validateSync(req.body);
+    const rows = await db(
+      "insert into reservation(room_id, user_id, people, name, phone, price, startDate, endDate) values(?,?,?,?,?,?,?,?)",
+      [
+        room_id,
+        req.session.userId,
+        people,
+        name,
+        phone,
+        price,
+        startDate,
+        endDate,
+      ]
+    );
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      error: error,
+    });
+  }
+}
+
+async function updateReservation(req: Request, res: Response) {
+  try {
+    const reserve_id = req.params.reserve_id;
+    const { room_id, people, name, phone, price, startDate, endDate } =
+      reservationSchema.validateSync(req.body);
+    const search = await db(
+      "select user_id from reservation where reserve_id=?",
+      [reserve_id]
+    );
+
+    if (!(req.session.userId === search[0].user_id)) {
+      console.log("asd");
+      res.status(400).send({
+        success: false,
+      });
+    } else {
+      console.log(search[0], req.session.userId);
+
+      const rows = await db(
+        "update reservation set room_id=?, people=?, name=?, phone=?, price=?, startDate=?, endDate=? where reserve_id=?",
+        [room_id, people, name, phone, price, startDate, endDate, reserve_id]
+      );
+      res.send({
+        success: true,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      msg: error,
+    });
+  }
+}
+
+async function deleteReservation(req: Request, res: Response) {
+  try {
+    const reserve_id = req.params.reserve_id;
+    const search = await db(
+      "select user_id from reservation where reserve_id=?",
+      [reserve_id]
+    );
+
+    if (!(req.session.userId === search[0].user_id)) {
+      console.log("asd");
+      res.status(400).send({
+        success: false,
+      });
+    } else {
+      console.log(search[0], req.session.userId);
+
+      const rows = await db("delete from reservation where reserve_id=?", [
+        reserve_id,
+      ]);
+      res.send({
+        success: true,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      msg: error,
+    });
+  }
+}
+
+export {
+  getReservation,
+  postReservation,
+  updateReservation,
+  deleteReservation,
+};
