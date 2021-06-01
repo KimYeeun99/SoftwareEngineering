@@ -164,9 +164,55 @@ async function deleteReservation(req: Request, res: Response) {
   }
 }
 
+async function hostReservation(req: Request, res: Response) {
+  try {
+    const rows = await db(
+      "select * from reservation where room_id IN (select room_id from room where camp_id IN (select id from campInfo where writer=?))",
+      [req.session.userId]
+    );
+
+    const data: Array<ReserveInterface> = JSON.parse(JSON.stringify(rows));
+    const list: Array<Reservation> = [];
+
+    data.forEach(async (value) => {
+      const detailRoom = await db("select * from room where room_id=?", [
+        value.room_id,
+      ]);
+      const detailUser = await db("select * from user where id=?", [
+        req.session.userId,
+      ]);
+
+      const room: Room = detailRoom[0];
+      const user: iUser = detailUser[0];
+
+      value.room = room;
+      value.customer = user;
+
+      const reservation = new Reservation(value);
+
+      reservation.setStartDate(formatDate(value.startDate));
+      reservation.setEndDate(formatDate(value.endDate));
+
+      list.push(reservation);
+    });
+
+    await delay(300);
+
+    res.json({
+      success: true,
+      data: list,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+    });
+  }
+}
+
 export {
   getReservation,
   postReservation,
   updateReservation,
   deleteReservation,
+  hostReservation,
 };
