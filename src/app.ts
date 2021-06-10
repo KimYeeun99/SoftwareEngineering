@@ -5,18 +5,15 @@ import user from "./api/User/router";
 import camp from "./api/Camp/router";
 import reservation from "./api/Reservation/router";
 import review from "./api/Review/router";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors);
 
 app.set("port", process.env.PORT || 3000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.all("/*", function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  next();
-});
 
 declare module "express-session" {
   interface SessionData {
