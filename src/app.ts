@@ -12,6 +12,12 @@ app.set("port", process.env.PORT || 3000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.all("/*", function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
+
 declare module "express-session" {
   interface SessionData {
     userId: string;
@@ -26,7 +32,7 @@ app.use(
     secret: "asadlfkj!@#!@#dfgasdg",
     resave: false,
     saveUninitialized: true,
-  })
+  }),
 );
 
 app.get("/", async (req, res) => {
